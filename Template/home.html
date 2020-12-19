@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+    <title>Find Files by Keywords</title>
+  </head>
+  <body class="bg-dark">
+  <section id="files">
+      <div id="dropContainer">
+      <div class="container">
+          <center style="margin-top:100px">
+              <h4 class="text-success">Drop Files Here or Choose Files</h4>
+              <form action="/" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <input id="fileInput" accept="application/pdf" class="bg-light" type="file" name="files" multiple required><br>
+                  <button class="btn btn-danger my-2" type="submit">Upload</button>
+              </form>
+
+                  <h4 class="text-primary my-3">Your Uploaded PDFs</h4><br>
+                  {% if Files %}
+                      {% for f in Files %}
+                        <a class="text-danger" href="Files/{{f.File}}">{{f.File_Name}}</a><br>
+                      {% endfor %}
+                      <a href="/?delete=True">
+                          <button class="btn btn-light my-2" type="button">Delete All Files from Server</button>
+                      </a>
+                  {% else %}
+                    <h5 class="text-danger">PDFs not Uploaded Yet.</h5>
+                  {% endif %}
+          </center>
+      </div>
+      </div>
+  </section>
+
+  {% if Files %}
+  <section id="keywords">
+      <div class="container">
+          <center style="margin-top:100px">
+              <p class="text-danger">Separate Keywords by comma(,)<br>Like: Incomprehensible,Nice Stuff</p>
+              <form action="/" method="get">
+                  <input type="search" placeholder="Enter Keywords to find in PDFs" name="keyword" required>
+                  <button class="btn btn-sm btn-primary" type="submit">Find</button>
+              </form>
+                {% if Found_item %}
+                    <h4 class="text-light my-3">
+                        Keywords find in<br>
+                        {% for fi in Found_item %}
+                            <a href="Files/{{fi.1}}">{{fi.0}}</a>
+                            <small>(Total Pages: {{fi.2}})</small><br>
+                        {% endfor %}
+                    </h4>
+                {% else %}
+                    <h4 class="text-light my-2">Keywords Not Found in any PDFs.</h4>
+                {% endif %}
+          </center>
+      </div>
+  </section>
+  {% endif %}
+
+  <script>
+      dropContainer.ondragover = dropContainer.ondragenter = function(evt) {
+          evt.preventDefault();
+        };
+
+        dropContainer.ondrop = function(evt) {
+          // pretty simple -- but not for IE :(
+          fileInput.files = evt.dataTransfer.files;
+
+          // If you want to use some of the dropped files
+          const dT = new DataTransfer();
+          dT.items.add(evt.dataTransfer.files[0]);
+          dT.items.add(evt.dataTransfer.files[3]);
+          fileInput.files = dT.files;
+
+          evt.preventDefault();
+        };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+  </body>
+</html>
